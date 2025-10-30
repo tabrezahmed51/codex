@@ -1,105 +1,276 @@
-<h1 align="center">OpenAI Codex CLI</h1>
+# Telegram Bot Emulation App
 
-<p align="center"><code>npm i -g @openai/codex</code><br />or <code>brew install codex</code></p>
+A comprehensive web application for testing and developing Telegram bots in a safe, controlled environment.
 
-<p align="center"><strong>Codex CLI</strong> is a coding agent from OpenAI that runs locally on your computer.
-</br>
-</br>If you want Codex in your code editor (VS Code, Cursor, Windsurf), <a href="https://developers.openai.com/codex/ide">install in your IDE</a>
-</br>If you are looking for the <em>cloud-based agent</em> from OpenAI, <strong>Codex Web</strong>, go to <a href="https://chatgpt.com/codex">chatgpt.com/codex</a></p>
+## Features
 
-<p align="center">
-  <img src="./.github/codex-cli-splash.png" alt="Codex CLI splash" width="80%" />
-  </p>
+- 🤖 **Bot Session Management**: Create and manage multiple bot instances
+- 💬 **Real-time Chat Interface**: Interactive chat simulation with bots
+- 🔒 **Security First**: Input validation, rate limiting, and secure defaults
+- 🌐 **WebSocket Support**: Real-time updates and notifications
+- 📊 **Analytics Dashboard**: Track messages, users, and bot performance
+- 🎨 **Modern UI**: Clean, responsive interface with dark mode support
+- 🔧 **Developer Tools**: Webhook simulation, debugging, and logging
 
----
+## Tech Stack
 
-## Quickstart
+- **Backend**: Node.js + TypeScript + Express + Socket.IO
+- **Frontend**: Vanilla JavaScript + CSS3 + HTML5
+- **Security**: Helmet, CORS, Rate Limiting, Input Validation
+- **Development**: ESLint, Jest, TypeScript compiler
+- **Deployment**: Vercel-ready with optimized configuration
 
-### Installing and running Codex CLI
+## Quick Start
 
-Install globally with your preferred package manager. If you use npm:
+### Prerequisites
 
-```shell
-npm install -g @openai/codex
+- Node.js 16.0+ and npm 7.0+
+
+### Installation
+
+1. **Clone and setup**:
+   ```bash
+   git clone <repository>
+   cd telegram-bot-emulation-app
+   npm install
+   ```
+
+2. **Configure environment**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. **Development**:
+   ```bash
+   npm run dev
+   ```
+
+4. **Production build**:
+   ```bash
+   npm run build
+   npm start
+   ```
+
+### Environment Variables
+
+```env
+# Server
+PORT=3000
+NODE_ENV=development
+
+# Security
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# CORS
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+
+# Logging
+LOG_LEVEL=info
+LOG_FILE=logs/telegram-bot-emulator.log
 ```
 
-Alternatively, if you use Homebrew:
+## API Reference
 
-```shell
-brew install codex
+### Bot Management
+
+#### Create Bot Session
+```http
+POST /api/bots
+Content-Type: application/json
+
+{
+  "token": "123456789:ABCDEF1234567890abcdef1234567890abcdef",
+  "username": "my_test_bot",
+  "webhook_url": "https://example.com/webhook" // optional
+}
 ```
 
-Then simply run `codex` to get started:
-
-```shell
-codex
+#### Get Bot Info
+```http
+GET /api/bots/{sessionId}
 ```
 
-<details>
-<summary>You can also go to the <a href="https://github.com/openai/codex/releases/latest">latest GitHub Release</a> and download the appropriate binary for your platform.</summary>
+#### List All Bots
+```http
+GET /api/bots
+```
 
-Each GitHub Release contains many executables, but in practice, you likely want one of these:
+#### Delete Bot
+```http
+DELETE /api/bots/{sessionId}
+```
 
-- macOS
-  - Apple Silicon/arm64: `codex-aarch64-apple-darwin.tar.gz`
-  - x86_64 (older Mac hardware): `codex-x86_64-apple-darwin.tar.gz`
-- Linux
-  - x86_64: `codex-x86_64-unknown-linux-musl.tar.gz`
-  - arm64: `codex-aarch64-unknown-linux-musl.tar.gz`
+### Message Handling
 
-Each archive contains a single entry with the platform baked into the name (e.g., `codex-x86_64-unknown-linux-musl`), so you likely want to rename it to `codex` after extracting it.
+#### Send Message to Bot
+```http
+POST /api/bots/{sessionId}/sendMessage
+Content-Type: application/json
 
-</details>
+{
+  "message_id": 1,
+  "from": {
+    "id": 12345,
+    "is_bot": false,
+    "first_name": "John",
+    "username": "johndoe"
+  },
+  "date": 1640995200,
+  "chat": {
+    "id": 12345,
+    "type": "private",
+    "first_name": "John",
+    "username": "johndoe"
+  },
+  "text": "/start"
+}
+```
 
-### Using Codex with your ChatGPT plan
+#### Get Chat History
+```http
+GET /api/bots/{sessionId}/messages?limit=50
+```
 
-<p align="center">
-  <img src="./.github/codex-cli-login.png" alt="Codex CLI login" width="80%" />
-  </p>
+### Health Check
+```http
+GET /api/health
+```
 
-Run `codex` and select **Sign in with ChatGPT**. We recommend signing into your ChatGPT account to use Codex as part of your Plus, Pro, Team, Edu, or Enterprise plan. [Learn more about what's included in your ChatGPT plan](https://help.openai.com/en/articles/11369540-codex-in-chatgpt).
+## Usage Examples
 
-You can also use Codex with an API key, but this requires [additional setup](./docs/authentication.md#usage-based-billing-alternative-use-an-openai-api-key). If you previously used an API key for usage-based billing, see the [migration steps](./docs/authentication.md#migrating-from-usage-based-billing-api-key). If you're having trouble with login, please comment on [this issue](https://github.com/openai/codex/issues/1243).
+### Basic Bot Testing
 
-### Model Context Protocol (MCP)
+1. **Create a bot session** with your bot token
+2. **Open the chat interface** for interactive testing
+3. **Send messages** including commands like `/start`, `/help`
+4. **Monitor responses** and debug bot behavior
 
-Codex CLI supports [MCP servers](./docs/advanced.md#model-context-protocol-mcp). Enable by adding an `mcp_servers` section to your `~/.codex/config.toml`.
+### Webhook Simulation
 
+The emulator simulates webhook calls that would normally be sent to your bot's webhook URL:
 
-### Configuration
+```javascript
+// Simulated webhook payload
+{
+  "update_id": 123456789,
+  "message": {
+    "message_id": 1,
+    "from": { ... },
+    "date": 1640995200,
+    "chat": { ... },
+    "text": "Hello bot!"
+  }
+}
+```
 
-Codex CLI supports a rich set of configuration options, with preferences stored in `~/.codex/config.toml`. For full configuration options, see [Configuration](./docs/config.md).
+### Default Bot Commands
 
----
+- `/start` - Initialize bot interaction
+- `/help` - Show available commands
+- `/ping` - Test bot responsiveness
+- `/echo <text>` - Echo back the message
+- `/time` - Get current timestamp
 
-### Docs & FAQ
+## Architecture
 
-- [**Getting started**](./docs/getting-started.md)
-  - [CLI usage](./docs/getting-started.md#cli-usage)
-  - [Running with a prompt as input](./docs/getting-started.md#running-with-a-prompt-as-input)
-  - [Example prompts](./docs/getting-started.md#example-prompts)
-  - [Memory with AGENTS.md](./docs/getting-started.md#memory-with-agentsmd)
-  - [Configuration](./docs/config.md)
-- [**Sandbox & approvals**](./docs/sandbox.md)
-- [**Authentication**](./docs/authentication.md)
-  - [Auth methods](./docs/authentication.md#forcing-a-specific-auth-method-advanced)
-  - [Login on a "Headless" machine](./docs/authentication.md#connecting-on-a-headless-machine)
-- [**Advanced**](./docs/advanced.md)
-  - [Non-interactive / CI mode](./docs/advanced.md#non-interactive--ci-mode)
-  - [Tracing / verbose logging](./docs/advanced.md#tracing--verbose-logging)
-  - [Model Context Protocol (MCP)](./docs/advanced.md#model-context-protocol-mcp)
-- [**Zero data retention (ZDR)**](./docs/zdr.md)
-- [**Contributing**](./docs/contributing.md)
-- [**Install & build**](./docs/install.md)
-  - [System Requirements](./docs/install.md#system-requirements)
-  - [DotSlash](./docs/install.md#dotslash)
-  - [Build from source](./docs/install.md#build-from-source)
-- [**FAQ**](./docs/faq.md)
-- [**Open source fund**](./docs/open-source-fund.md)
+```
+src/
+├── controllers/     # API route handlers
+├── middleware/      # Express middleware
+├── models/          # Data models
+├── routes/          # API routes
+├── services/        # Business logic
+├── types/           # TypeScript type definitions
+├── utils/           # Utility functions
+└── server.ts        # Main application entry
 
----
+public/
+├── css/            # Stylesheets
+├── js/             # Frontend JavaScript
+└── index.html      # Main UI
+```
+
+## Security Features
+
+- **Input Validation**: Joi schemas for all inputs
+- **Rate Limiting**: Configurable request limits
+- **CORS Protection**: Whitelist allowed origins  
+- **Helmet Security**: Security headers and CSP
+- **XSS Prevention**: HTML sanitization
+- **Error Handling**: Safe error responses
+
+## Development Commands
+
+```bash
+# Development
+npm run dev          # Start with hot reload
+npm run build        # Compile TypeScript
+npm run start        # Start production server
+
+# Code Quality
+npm run lint         # ESLint check
+npm run test         # Run Jest tests
+npm run clean        # Clean build artifacts
+
+# Deployment
+vercel deploy        # Deploy to Vercel
+```
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. **Connect repository** to Vercel
+2. **Set environment variables** in Vercel dashboard
+3. **Deploy automatically** on push to main branch
+
+### Manual Deployment
+
+```bash
+npm run build
+npm start
+```
+
+### Docker (Optional)
+
+```dockerfile
+FROM node:16-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+## Monitoring and Logging
+
+- **Winston Logger**: Structured logging with multiple transports
+- **Request Logging**: HTTP request/response tracking
+- **Error Tracking**: Comprehensive error capture
+- **Performance Metrics**: Response time monitoring
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
 ## License
 
-This repository is licensed under the [Apache-2.0 License](LICENSE).
+MIT License - see [LICENSE](LICENSE) file for details.
 
+## Support
+
+- **Documentation**: Check this README
+- **Issues**: Create GitHub issue
+- **Security**: Report via email (see SECURITY.md)
+
+---
+
+**Built with ❤️ for the Telegram bot development community**
